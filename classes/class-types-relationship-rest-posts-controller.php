@@ -1,6 +1,6 @@
 <?php
 if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
-	class Types_Relationship_REST_Post_Controller extends \WP_REST_Posts_Controller {
+	class Types_Relationship_REST_Posts_Controller extends \WP_REST_Posts_Controller {
 		public $parent_type  = null;
 		public $child_type   = null;
 		public $interim_type = null;
@@ -169,6 +169,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 					 * 		what part of the relationship we're querying/returning
 					 */
 					if ( $post->post_type == $this->child_type ) {
+						$data[$post->ID] = $this->add_meta_data( $data[$post->ID], $post );
 						$data[$post->ID] = apply_filters( 'types-relationship-api-final-data', $data[$post->ID], $post );
 						$data[$post->ID][$params['parent']] = get_post( $params['parent_id'] );
 						if ( ! empty( $params['interim'] ) && array_key_exists( $post->ID, $ids ) ) {
@@ -189,5 +190,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				return $data;
 			}
 		}
+		
+		abstract protected function add_meta_data( $data, $post ) {}
 	}
 }

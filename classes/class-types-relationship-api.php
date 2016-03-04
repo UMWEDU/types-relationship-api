@@ -10,12 +10,14 @@ abstract class Types_Relationship_API {
 	public $meta_data    = null;
 	public $namespace    = 'types/relationships';
 	public $version      = 'v1';
+	public $route        = null;
 	
 	/**
 	 * Begin constructing our object
 	 */
 	function __construct() {
-		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		if ( ! class_exists( 'Types_Relationship_REST_Post_Controller' ) )
+			require_once( plugin_dir_path( __FILE__ ) . '/class-types-relationship-rest-posts-controller.php' );
 	}
 	
 	/**
@@ -24,7 +26,7 @@ abstract class Types_Relationship_API {
 	function register_routes() {
 		$root = $this->namespace;
 		$version = $this->version;
-		$cb_class = new \Types_Relationship_REST_Post_Controller( $this->parent_type, $this->child_type, $this->interim_type );
+		$cb_class = new \Types_Relationship_REST_Posts_Controller( $this->parent_type, $this->child_type, $this->interim_type );
 		
 		/**
 		 * Set up an endpoint to retrieve all posts that share a many-to-many relationship with the specified parent post
@@ -76,6 +78,13 @@ abstract class Types_Relationship_API {
 	}
 	
 	/**
+	 * Placeholder function to eventually perform some sort of permissions check
+	 */
+	function permissions_check() {
+		return true;
+	}
+	
+	/**
 	 * This is a placeholder function until I figure out a way 
 	 * 		to validate that a post type is actually registered/available
 	 */
@@ -107,5 +116,12 @@ abstract class Types_Relationship_API {
 			return $key;
 		
 		return 'date';
+	}
+	
+	/**
+	 * Return the full REST route for the route that was registered
+	 */
+	function get_rest_url() {
+		return "/wp-json/{$this->namespace}/{$this->version}/{$this->parent_type}/{$this->child_type}";
 	}
 }
