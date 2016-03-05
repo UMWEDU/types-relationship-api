@@ -18,6 +18,8 @@ abstract class Types_Relationship_API {
 	function __construct() {
 		if ( ! class_exists( 'Types_Relationship_REST_Post_Controller' ) )
 			require_once( plugin_dir_path( __FILE__ ) . '/class-types-relationship-rest-posts-controller.php' );
+		
+		add_filter( 'types-relationship-api-post-data', array( $this, 'add_meta_data' ), 10, 2 );
 	}
 	
 	/**
@@ -124,4 +126,9 @@ abstract class Types_Relationship_API {
 	function get_rest_url() {
 		return "/wp-json/{$this->namespace}/{$this->version}/{$this->parent_type}/{$this->child_type}";
 	}
+	
+	/**
+	 * Require a function that adds appropriate meta data to the retrieved posts
+	 */
+	abstract protected function add_meta_data( $data, $post );
 }

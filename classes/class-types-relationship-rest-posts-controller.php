@@ -110,7 +110,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				foreach ( $interims as $k=>$v ) {
 					$tmp = get_post_meta( $k, sprintf( '_wpcf_belongs_%s_id', $params['child'] ), true );
 					if ( ! empty( $tmp ) ) {
-						$ids[$tmp] = clone $v;
+						$ids[$tmp] = $v;
 					}
 				}
 				
@@ -135,14 +135,21 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 					$image = $_image[0];
 				}
 			}
-			$data[ $post->ID ] = apply_filters( 'types-relationship-api-post-data', array(
+			
+			$data[ $post->ID ] = array(
 				'name'         => $post->post_title,
 				'link'         => get_permalink( $post->ID ),
 				'image_markup' => get_the_post_thumbnail( $post->ID, 'large' ),
 				'image_src'    => $image,
 				'excerpt'      => $post->post_excerpt,
 				'slug'         => $post->post_name, 
-			), $post );
+				'type'         => $post->post_type, 
+			);
+			
+			$meta = apply_filters( 'types-relationship-api-post-data', array(), $post );
+			foreach ( $meta as $key => $value ) {
+				$data[ $post->ID ][$key] = get_post_meta( $post->ID, $value, true );
+			}
 			
 			do_action( 'types-relationship-api-made-data' );
 			
@@ -169,7 +176,6 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 					 * 		what part of the relationship we're querying/returning
 					 */
 					if ( $post->post_type == $this->child_type ) {
-						$data[$post->ID] = $this->add_meta_data( $data[$post->ID], $post );
 						$data[$post->ID] = apply_filters( 'types-relationship-api-final-data', $data[$post->ID], $post );
 						$data[$post->ID][$params['parent']] = get_post( $params['parent_id'] );
 						if ( ! empty( $params['interim'] ) && array_key_exists( $post->ID, $ids ) ) {
@@ -190,7 +196,5 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				return $data;
 			}
 		}
-		
-		abstract protected function add_meta_data( $data, $post ) {}
 	}
 }
