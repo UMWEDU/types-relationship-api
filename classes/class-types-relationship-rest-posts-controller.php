@@ -69,6 +69,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 		 */
 		public function get_items( $request ) {
 			$params = $request->get_params();
+			
 			$params['parent']  = $this->get_parent_type();
 			$params['child']   = $this->get_child_type();
 			$params['interim'] = $this->get_interim_type();

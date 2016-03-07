@@ -43,18 +43,6 @@ abstract class Types_Relationship_API {
 				'default' => 1,
 				'sanitize_callback' => 'absint',
 			),
-			'parent' => array(
-				'default' => $this->parent_type,
-				'sanitize_callback' => array( $this, 'valid_post_types' ),
-			),
-			'child' => array( 
-				'default' => $this->child_type, 
-				'sanitize_callback' => array( $this, 'valid_post_types' ), 
-			), 
-			'interim' => array(
-				'default' => $this->interim_type, 
-				'sanitize_callback' => array( $this, 'valid_post_types' ), 
-			), 
 			'parent_id' => array(
 				'default' => 0, 
 				'sanitize_callback' => 'absint', 
