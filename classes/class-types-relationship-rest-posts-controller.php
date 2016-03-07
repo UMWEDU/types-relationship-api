@@ -86,7 +86,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 			 * Make sure we have a numeric ID for our parent ID
 			 */
 			if ( empty( $params['parent_id'] ) && ! empty( $params['slug'] ) ) {
-				$parent = get_page_by_path( $params['slug'] );
+				$parent = get_page_by_path( $params['slug'], OBJECT, $this->parent_type );
 				if ( ! is_wp_error( $parent ) )
 					$params['parent_id'] = $parent->ID;
 			}
