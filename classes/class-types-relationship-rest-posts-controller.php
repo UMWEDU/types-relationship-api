@@ -4,6 +4,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 		public $parent_type  = null;
 		public $child_type   = null;
 		public $interim_type = null;
+		public $interim_posts = array();
 		
 		public function __construct( $parent_type=null, $child_type=null, $interim_type=null ) {
 			$this->set_parent_type( $parent_type );
@@ -77,6 +78,9 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				'paged'          => $params['page'],
 				'orderby'        => $params['orderby'],
 			);
+			
+			if ( empty( $params['parent_id'] ) )
+				$params['parent_id'] = ! empty( $params['id'] ) ? intval( $params['id'] ) : 0;
 			/**
 			 * Make sure we have a numeric ID for our parent ID
 			 */
@@ -84,6 +88,10 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				$parent = get_page_by_path( $params['slug'] );
 				if ( ! is_wp_error( $parent ) )
 					$params['parent_id'] = $parent->ID;
+			}
+			
+			if ( empty( $params['parent_id'] ) || $this->parent_type != get_post_type( $params['parent_id'] ) ) {
+				return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post id.' ), array( 'status' => 404 ) );
 			}
 			
 			/**
@@ -106,16 +114,15 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				) );
 				
 				$interims = $this->do_query( $request, $args, false );
-				$ids = array();
 				foreach ( $interims as $k=>$v ) {
 					$tmp = get_post_meta( $k, sprintf( '_wpcf_belongs_%s_id', $params['child'] ), true );
 					if ( ! empty( $tmp ) ) {
-						$ids[$tmp] = $v;
+						$this->interim_posts[$tmp] = $v;
 					}
 				}
 				
 				$args['post_type'] = $params['child'];
-				$args['post__in'] = array_keys( $ids );
+				$args['post__in'] = array_keys( $this->interim_posts );
 				unset( $args['meta_query'] );
 			}
 			
@@ -166,6 +173,10 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 		protected function do_query( $request, $args, $respond=true ) {
 			$posts_query  = new \WP_Query();
 			$query_result = $posts_query->query( $args );
+			$params = $request->get_params();
+			
+			if ( empty( $params['parent_id'] ) )
+				$params['parent_id'] = ! empty( $params['id'] ) ? intval( $params['id'] ) : 0;
 			
 			$data = array();
 			if ( ! empty( $query_result ) ) {
@@ -178,8 +189,8 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 					if ( $post->post_type == $this->child_type ) {
 						$data[$post->ID] = apply_filters( 'types-relationship-api-final-data', $data[$post->ID], $post );
 						$data[$post->ID][$params['parent']] = get_post( $params['parent_id'] );
-						if ( ! empty( $params['interim'] ) && array_key_exists( $post->ID, $ids ) ) {
-							$data[$post->ID][$params['interim']] = $ids[$post->ID];
+						if ( ! empty( $params['interim'] ) && array_key_exists( $post->ID, $this->interim_posts ) ) {
+							$data[$post->ID][$params['interim']] = $this->interim_posts[$post->ID];
 						}
 					} else if ( $post->post_type == $this->parent_type ) {
 						$data[$post->ID] = apply_filters( 'types-relationship-api-parent-data', $data[$post->ID], $post );
