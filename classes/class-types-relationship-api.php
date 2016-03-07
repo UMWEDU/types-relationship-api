@@ -4,22 +4,60 @@
  * 		Types post type relationships
  */
 abstract class Types_Relationship_API {
+	/**
+	 * @var string required - the slug identifying the parent post type
+	 */
 	public $parent_type  = null;
+	/**
+	 * @var string required - the slug identifying the child post type
+	 */
 	public $child_type   = null;
+	/**
+	 * @var string optional - the slug identifying the interim (child) post type
+	 * Required if you are trying to query a many-to-many post type relationship
+	 * 		In that case, this would be the actual "child" post type, while the 
+	 * 		parent_type and child_type properties would be the two parents of that child
+	 */
 	public $interim_type = null;
 	public $meta_data    = null;
+	/**
+	 * @var string - the base route path; should not be altered
+	 */
 	public $namespace    = 'types/relationships';
+	/**
+	 * @var string - the version information to include in the route path; should not be altered
+	 */
 	public $version      = 'v1';
-	public $route        = null;
+	/**
+	 * @var string - the base route, which will be constructed based on the parent_type & child_type properties
+	 */
+	protected $route        = null;
 	
 	/**
 	 * Begin constructing our object
+	 * @uses Types_Relationship_API::set_route() to construct the base route string
 	 */
 	function __construct() {
 		if ( ! class_exists( 'Types_Relationship_REST_Post_Controller' ) )
 			require_once( plugin_dir_path( __FILE__ ) . '/class-types-relationship-rest-posts-controller.php' );
 		
+		$this->set_route();
+		
 		add_filter( 'types-relationship-api-post-data', array( $this, 'add_meta_data' ), 10, 2 );
+	}
+	
+	/**
+	 * Set the route path for the API requests
+	 */
+	function set_route() {
+		$this->route = "{$this->parent_type}/{$this->child_type}";
+	}
+	
+	/**
+	 * Retrieve the route path for API requests
+	 */
+	function get_route() {
+		return $this->route;
 	}
 	
 	/**
@@ -58,7 +96,7 @@ abstract class Types_Relationship_API {
 		 * @param int $parent_id the ID of the department
 		 * @param string $slug the slug of the department (if you can't provide the ID)
 		 */
-		register_rest_route( "{$root}/{$version}", "/{$this->parent_type}/{$this->child_type}" . '/(?P<id>[\d]+)', array(
+		register_rest_route( "{$root}/{$version}", $this->get_route() . '/(?P<id>[\d]+)', array(
 			array(
 				'methods'         => \WP_REST_Server::READABLE,
 				'callback'        => array( $cb_class, 'get_items' ),
@@ -67,7 +105,7 @@ abstract class Types_Relationship_API {
 				'permission_callback' => array( $this, 'permissions_check' )
 			),
 		) );
-		register_rest_route( "{$root}/{$version}", "/{$this->parent_type}/{$this->child_type}", array(
+		register_rest_route( "{$root}/{$version}", $this->get_route(), array(
 			array(
 				'methods'         => \WP_REST_Server::READABLE,
 				'callback'        => array( $cb_class, 'get_items' ),
