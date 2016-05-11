@@ -89,6 +89,8 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				$parent = get_page_by_path( $params['slug'], OBJECT, $this->parent_type );
 				if ( ! is_wp_error( $parent ) )
 					$params['parent_id'] = $parent->ID;
+				else
+					return $parent;
 			}
 			
 			if ( empty( $params['parent_id'] ) || $this->parent_type != get_post_type( $params['parent_id'] ) ) {

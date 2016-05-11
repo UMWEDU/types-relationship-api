@@ -87,7 +87,9 @@ abstract class Types_Relationship_API {
 			), 
 			'slug' => array(
 				'default' => false,
-				'sanitize_callback' => 'sanitize_title',
+				/* sanitize_title strips slashes, so that's no good */
+				/*'sanitize_callback' => 'sanitize_title',*/
+				'sanitize_callback' => array( $this, 'valid_slug' ), 
 			)
 		);
 		
@@ -155,6 +157,21 @@ abstract class Types_Relationship_API {
 			return $key;
 		
 		return 'date';
+	}
+	
+	/**
+	 * Attempt to verify whether something is a valid slug for use in get_page_by_path()
+	 */
+	function valid_slug( $slug ) {
+		if ( ! stristr( $slug, '/' ) )
+			return sanitize_title( $slug );
+		
+		$parts = explode( '/', $slug );
+		foreach ( $parts as $k=>$v ) {
+			$parts[$k] = sanitize_title( $v );
+		}
+		
+		return implode( '/', $parts );
 	}
 	
 	/**
