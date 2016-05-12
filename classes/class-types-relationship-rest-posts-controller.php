@@ -40,6 +40,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 		 * Set up a proper REST response from the data we gathered
 		 */
 		protected function create_response( $request, $args, $data ) {
+			$data = array_values( $data );
 			$response    = rest_ensure_response( $data );
 			$count_query = new \WP_Query();
 			unset( $args['paged'] );
@@ -147,6 +148,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 			}
 			
 			$data[ $post->ID ] = array(
+				'id'           => $post->ID, 
 				'name'         => $post->post_title,
 				'link'         => get_permalink( $post->ID ),
 				'image_markup' => get_the_post_thumbnail( $post->ID, 'large' ),
