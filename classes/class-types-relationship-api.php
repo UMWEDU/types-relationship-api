@@ -44,6 +44,7 @@ abstract class Types_Relationship_API {
 		$this->set_route();
 		
 		add_filter( 'types-relationship-api-post-data', array( $this, 'add_meta_data' ), 10, 2 );
+		add_filter( 'types-relationship-api-post-taxonomies', array( $this, 'add_taxonomies' ), 10, 2 );
 	}
 	
 	/**
@@ -185,4 +186,9 @@ abstract class Types_Relationship_API {
 	 * Require a function that adds appropriate meta data to the retrieved posts
 	 */
 	abstract protected function add_meta_data( $data, $post );
+	
+	/**
+	 * Require a function that adds any desired taxonomies to the data returned for posts
+	 */
+	abstract protected function add_taxonomies( $taxes, $post );
 }

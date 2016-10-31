@@ -163,6 +163,13 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				$data[ $post->ID ][$key] = get_post_meta( $post->ID, $value, true );
 			}
 			
+			$taxes = apply_filters( 'types-relationship-api-post-taxonomies', array(), $post );
+			if ( ! empty( $taxes ) ) {
+				foreach ( $taxes as $tax ) {
+					$data[ $post->ID ][$key] = get_the_terms( $post->ID, $tax );
+				}
+			}
+			
 			do_action( 'types-relationship-api-made-data' );
 			
 			return $data;
