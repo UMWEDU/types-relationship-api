@@ -166,7 +166,13 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 			$taxes = apply_filters( 'types-relationship-api-post-taxonomies', array(), $post );
 			if ( ! empty( $taxes ) ) {
 				foreach ( $taxes as $tax ) {
-					$data[ $post->ID ][$key] = get_the_terms( $post->ID, $tax );
+					$tmp = get_the_terms( $post->ID, $tax );
+					if ( ! is_wp_error( $tmp ) && ! empty( $tmp ) ) {
+						$data[ $post->ID ][$tax] = array();
+						foreach ( $tmp as $term ) {
+							$data[ $post->ID ][$tax][$term->term_id] = array( 'name' => $term->name, 'slug' => $term->slug );
+						}
+					}
 				}
 			}
 			
