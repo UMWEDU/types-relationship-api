@@ -130,6 +130,8 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				unset( $args['meta_query'] );
 			}
 			
+			$args = apply_filters( 'types-relationship-api-query-args', $args, $params );
+			
 			return $this->do_query( $request, $args );
 		}
 		

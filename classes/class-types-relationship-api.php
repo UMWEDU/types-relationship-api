@@ -69,7 +69,7 @@ abstract class Types_Relationship_API {
 		$version = $this->version;
 		$cb_class = new \Types_Relationship_REST_Posts_Controller( $this->parent_type, $this->child_type, $this->interim_type );
 		
-		$rest_args = array(
+		$rest_args = apply_filters( 'types-relationship-api-valid-rest-arguments', array(
 			'per_page' => array(
 				'default' => 10,
 				'sanitize_callback' => 'absint',
@@ -92,7 +92,7 @@ abstract class Types_Relationship_API {
 				/*'sanitize_callback' => 'sanitize_title',*/
 				'sanitize_callback' => array( $this, 'valid_slug' ), 
 			)
-		);
+		) );
 		
 		/**
 		 * Set up an endpoint to retrieve all posts that share a many-to-many relationship with the specified parent post
