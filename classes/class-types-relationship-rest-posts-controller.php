@@ -117,6 +117,9 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 					'value' => $params['parent_id'], 
 				) );
 				
+				$per_page = $args['posts_per_page'];
+				$args['posts_per_page'] = -1;
+				
 				$interims = $this->do_query( $request, $args, false );
 				foreach ( $interims as $k=>$v ) {
 					$tmp = get_post_meta( $k, sprintf( '_wpcf_belongs_%s_id', $params['child'] ), true );
@@ -127,6 +130,7 @@ if ( ! class_exists( 'Types_Relationship_REST_Posts_Controller' ) ) {
 				
 				$args['post_type'] = $params['child'];
 				$args['post__in'] = array_keys( $this->interim_posts );
+				$args['posts_per_page'] = $per_page;
 				unset( $args['meta_query'] );
 			}
 			
